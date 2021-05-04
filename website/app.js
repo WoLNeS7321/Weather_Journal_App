@@ -1,77 +1,68 @@
-/* Global Variables */
+const form = document.querySelector('.app__form');
+const icons = document.querySelectorAll('.entry__icon');
 
-let baseURL = 'https://api.openweathermap.org/data/2.5/weather?zip=';
-let key = '661daa7377189bfe425b6af1f07ac279';
+const apiURL = 'https://api.openweathermap.org/data/2.5/weather?zip=';
+const key = '&appid=4325b0926e2205f5251e74050f335794';
 
-// Create a new date instance dynamically with JS
-let d = new Date();
-let newDate = d.toLocaleString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+let knowledge = new Date();
+let newknowledge = knowledge.getMonth() + '.' + knowledge.getDate() + '.' + knowledge.getFullYear();
 
 document.getElementById('generate').addEventListener('click', performAction);
 
-function performAction(e){
-    const postCode = document.getElementById('zip').value;
-    const feelings = document.getElementById('feelings').value;
-    console.log(newDate);
-    getTemperature(baseURL, postCode, key)
-    .then(function (data){
-        // Add data to POST request
-        postData('http://localhost:8080/addWeatherData', {temperature: data.main.temp, date: newDate, user_response: feelings } )
-        // Function which updates UI
-        .then(function() {
-            updateUI()
-        })
+function performAction(e) {
+  e.preventDefault();
+  const code = document.getElementById('zip').value;
+  const content = document.getElementById('feelings').value;
+
+  getTemperature(apiURL, code, key)
+    .then(function (dataUesr) {
+      postData('/add', { date: newknowledge, temp: dataUesr.main.temp, content })
+    }).then(function () {
+      updateUI()
     })
+  form.reset();
 }
 
-// Async GET
-const getTemperature = async (baseURL, code, key)=>{
-// const getTemperatureDemo = async (url)=>{
-    const response = await fetch(baseURL + code + ',us' + '&APPID=' + key)
-    console.log(response);
-    try {
-        const data = await response.json();
-        console.log(data);
-        console.log('PIRMAS');
-        return data;
-    }
-    catch(error) {
-        console.log('error', error);
-    }
+const getTemperature = async (apiURL, code, key) => {
+  const res = await fetch(apiURL + code + key);
+  try {
+    const dataUesr = await res.json();
+    return dataUesr;
+  }
+  catch (error) {
+    console.log('error', error);
+  }
 }
 
-// Async POST
 const postData = async (url = '', data = {}) => {
-    const postRequest = await fetch(url, {
-        method: 'POST',
-        credentials: 'same-origin',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-    });
-    try {
-        console.log('ANTRAS');
-        const newData = await postRequest.json();
-        console.log(newData, 'ANTRAS VEL');
-        return newData;
-    }
-    catch (error) {
-        console.log('Error', error);
-    }
-}
+  const postRequest = await fetch(url, {
+    method: "POST",
+    credentials: "same-origin",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ date: data.date, temp: data.temp, content: data.content })
+  })
 
-// Update user interface
+  try {
+    const newData = await postRequest.json();
+    return newData;
+  }
+  catch (error) {
+    console.log('Error', error);
+  }
+};
+
 const updateUI = async () => {
-    const request = await fetch('http://localhost:8080/all');
-    try {
-        const allData = await request.json();
-        console.log('TRECIAS');
-        document.getElementById('date').innerHTML = allData.date;
-        document.getElementById('temp').innerHTML = allData.temperature;
-        document.getElementById('content').innerHTML = allData.user_response;
-    }
-    catch (error) {
-        console.log('error', error);
-    }
-}
+  const request = await fetch('/all');
+  try {
+    const allData = await request.json()
+    icons.forEach(icon => icon.style.opacity = '1');
+    document.getElementById('date').innerHTML = allData.date;
+    document.getElementById('temp').innerHTML = allData.temp;
+    document.getElementById('content').innerHTML = allData.content;
+  }
+  catch (error) {
+    console.log("error", error);
+  }
+};
