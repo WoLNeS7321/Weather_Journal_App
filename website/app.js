@@ -5,12 +5,15 @@ const apiURL = 'https://api.openweathermap.org/data/2.5/weather?zip=';
 const key = '&appid=4325b0926e2205f5251e74050f335794';
 
 let knowledge = new Date();
-let newknowledge = knowledge.getMonth() + '.' + knowledge.getDate() + '.' + knowledge.getFullYear();
+let newknowledge =
+  knowledge.getMonth() +
+  knowledge.getDate() +
+  knowledge.getFullYear();
 
 document.getElementById('generate').addEventListener('click', performAction);
 
-function performAction(e) {
-  e.preventDefault();
+function performAction(per) {
+  per.preventDefault();
   const code = document.getElementById('zip').value;
   const content = document.getElementById('feelings').value;
 
@@ -34,13 +37,11 @@ const getTemperature = async (apiURL, code, key) => {
   }
 }
 
-const postData = async (url = '', data = {}) => {
+const postData = async (url = "", data = {}) => {
   const postRequest = await fetch(url, {
     method: "POST",
     credentials: "same-origin",
-    headers: {
-      "Content-Type": "application/json"
-    },
+    headers: {"Content-Type": "application/json"},
     body: JSON.stringify({ date: data.date, temp: data.temp, content: data.content })
   })
 
@@ -49,7 +50,7 @@ const postData = async (url = '', data = {}) => {
     return newData;
   }
   catch (error) {
-    console.log('Error', error);
+    console.log('error', error);
   }
 };
 
